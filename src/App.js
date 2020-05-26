@@ -1,8 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import plane from './planeicon.svg'
 import './App.css';
 
+import axios from 'axios'
+
+import Ticket from './Ticket'
+
 function App() {
+  const [searchId, setSearchId] = useState('');
+  useEffect(() => {
+    axios.get('https://front-test.beta.aviasales.ru/search').then((res) => {
+      setSearchId(res.searchId);
+    });
+  }, []);
   return (
     <div className="App">
       <header className="App-header">
@@ -14,17 +24,48 @@ function App() {
           <h1>Количество пересадок</h1>
           <div className="filters">
             <p>
-              <input type="checkbox" name="option2" value="a2" />
-              <span className="checkmark"></span>
-            Все</p>
-            <p><input type="checkbox" name="option2" value="a2" />Без пересадок</p>
-            <p><input type="checkbox" name="option2" value="a2" />1 пересадка</p>
-            <p><input type="checkbox" name="option2" value="a2" />2 пересадки</p>
-            <p><input type="checkbox" name="option2" value="a2" />3 пересадки</p>
+              <label className="checkbox-container">Все
+                <input type="checkbox" />
+                <span className="checkmark"></span>
+              </label>
+            </p>
+            <p>
+              <label className="checkbox-container">Без пересадок
+                <input type="checkbox" />
+                <span className="checkmark"></span>
+              </label>
+            </p>
+            <p>
+              <label className="checkbox-container">1 пересадка
+                <input type="checkbox" />
+                <span className="checkmark"></span>
+              </label>
+            </p>
+            <p>
+              <label className="checkbox-container">2 пересадки
+                <input type="checkbox" />
+                <span className="checkmark"></span>
+              </label>
+            </p>
+            <p>
+              <label className="checkbox-container">3 пересадки
+                <input type="checkbox" />
+                <span className="checkmark"></span>
+              </label>
+            </p>
           </div>
         </div>
         <div className="content">
-
+          <div className='top-buttons'>
+            <button className='left-button'>Самый дешевый</button>
+            <button className='right-button'>Самый быстрый</button>
+          </div>
+          <div className="tickets">
+            <Ticket />
+            <Ticket />
+            <Ticket />
+            {searchId}
+          </div>
         </div>
       </main>
     </div>
