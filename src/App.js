@@ -8,9 +8,17 @@ import Ticket from './Ticket'
 
 function App() {
   const [searchId, setSearchId] = useState('');
+  const [tikets, setTikets] = useState([]);
   useEffect(() => {
     axios.get('https://front-test.beta.aviasales.ru/search').then((res) => {
-      setSearchId(res.searchId);
+      setSearchId(res.data.searchId);
+      axios.get('https://front-test.beta.aviasales.ru/tickets', {
+        params: {
+          searchId: res.data.searchId,
+        }
+      }).then((res) => {
+        setTikets( [...tikets, ...res.data.tickets]);
+      }).catch(e => console.log(e));
     });
   }, []);
   return (
@@ -61,10 +69,11 @@ function App() {
             <button className='right-button'>Самый быстрый</button>
           </div>
           <div className="tickets">
-            <Ticket />
-            <Ticket />
-            <Ticket />
-            {searchId}
+            {
+              tikets.length && tikets.map((tiket, i) => 
+                <Ticket tiket={tiket} key={i}/>
+              )
+            }
           </div>
         </div>
       </main>

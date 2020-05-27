@@ -1,6 +1,6 @@
 .ticket {
     width: 502px;
-    height: 184px;
+    min-height: 184px;
     box-sizing: border-box;
     margin-top: 20px;
     display: flex;
