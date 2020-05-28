@@ -5,14 +5,17 @@ import './Ticket.css'
 export function Ticket({ tiket }) {
 
     const suffiks = (number) => {
-        switch(number){
-            case number % 10 === 1:
-                return 'ка';
-            case number>0 && number<5:
-                return 'ки';
-            default:
-                return 'ок';
-        }
+        console.log(number % 10);
+        if (number % 10 === 1) return 'ка';
+        if (number>0 && number<5) return 'ки';
+        return 'ок';
+    }
+
+    const toTimeFormat = (time) => {
+        let rez = '';
+        if (Math.floor(time/60)) rez += Math.floor(time/60) + 'ч ';
+        rez += time%60 + 'м';
+        return rez;
     }
 
     return (
@@ -35,7 +38,7 @@ export function Ticket({ tiket }) {
                             </div>
                             <div className='details'>
                                 <h1>В пути</h1>
-                                <h2>{segment.duration}</h2>
+                                <h2>{toTimeFormat(segment.duration)}</h2>
                             </div>
                             <div className='details'>
                                 <h1>{`${segment.stops.length} пересад${suffiks(segment.stops.length)}`}</h1>
