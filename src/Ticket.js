@@ -5,7 +5,6 @@ import './Ticket.css'
 export function Ticket({ tiket }) {
 
     const suffiks = (number) => {
-        console.log(number % 10);
         if (number % 10 === 1) return 'ка';
         if (number>0 && number<5) return 'ки';
         return 'ок';
@@ -16,6 +15,14 @@ export function Ticket({ tiket }) {
         if (Math.floor(time/60)) rez += Math.floor(time/60) + 'ч ';
         rez += time%60 + 'м';
         return rez;
+    }
+
+    const formatDate = (_date, duration) => {
+        let date = new Date(_date);
+        let res =  date.getHours() + ':' + date.getMinutes() + '-';
+        date = new Date(date.getTime() + duration*60000);
+        res += date.getHours() + ':' + date.getMinutes();
+        return res;
     }
 
     return (
@@ -34,7 +41,7 @@ export function Ticket({ tiket }) {
                         <div className='segment' key={i}>
                             <div className='details'>
                                 <h1>{segment.origin}-{segment.destination}</h1>
-                                <h2>20:20-00:02</h2>
+                                <h2>{formatDate(segment.date, segment.duration)}</h2>
                             </div>
                             <div className='details'>
                                 <h1>В пути</h1>
@@ -42,7 +49,7 @@ export function Ticket({ tiket }) {
                             </div>
                             <div className='details'>
                                 <h1>{`${segment.stops.length} пересад${suffiks(segment.stops.length)}`}</h1>
-                                <h2>{segment.stops.join(', ')}</h2>
+                                <h2>{segment.stops.length ? segment.stops.join(', ') : '--'}</h2>
                             </div>
                         </div>
                     ))

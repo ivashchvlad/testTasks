@@ -9,6 +9,9 @@ import Ticket from './Ticket'
 function App() {
   const [searchId, setSearchId] = useState('');
   const [tikets, setTikets] = useState([]);
+  const [filter, setFilter] = useState('');
+  const [sort, setSort] = useState('cheap');
+
   useEffect(() => {
     axios.get('https://front-test.beta.aviasales.ru/search').then((res) => {
       setSearchId(res.data.searchId);
@@ -21,6 +24,24 @@ function App() {
       }).catch(e => console.log(e));
     });
   }, []);
+
+
+
+  const handleClickCheap = () => {
+    setSort('cheap');
+  }
+
+  const handleClickFast = () => {
+    setSort('fast');
+  }
+
+  const sorting = (a,b) => {
+    if(sort === 'cheap') return a.price - b.price;
+    if(sort === 'fast') {
+      return Math.min(...a.segments.map((x)=>x.duration)) - Math.min(...b.segments.map((x)=>x.duration));
+    }
+  }
+
   return (
     <div className="App">
       <header className="App-header">
@@ -65,14 +86,22 @@ function App() {
         </div>
         <div className="content">
           <div className='top-buttons'>
-            <button className='left-button'>Самый дешевый</button>
-            <button className='right-button'>Самый быстрый</button>
+            <button 
+              className={'left-button ' + (sort==='cheap' && 'active-button')} 
+              onClick={handleClickCheap}>
+                Самый дешевый
+            </button>
+            <button 
+              className={'right-button ' + (sort==='fast' && 'active-button')} 
+              onClick={handleClickFast}>
+                Самый быстрый
+            </button>
           </div>
           <div className="tickets">
             {
-              tikets.length && tikets.map((tiket, i) => 
+              tikets.length ? tikets.sort(sorting).map((tiket, i) => 
                 <Ticket tiket={tiket} key={i}/>
-              )
+              ) : 'Loading...'
             }
           </div>
         </div>

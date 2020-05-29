@@ -162,15 +162,24 @@
 
 .left-button {
   border-radius: 5px 0px 0px 5px;
-  border: 1px solid #2196F3;
-  background: #2196F3;
-  color: #FFFFFF;
+  border: 1px solid #DFE5EC;
+  background: #FFFFFF;
+  color: #4A4A4A;
+
 }
 
 .right-button {
   border-radius: 0px 5px 5px 0px;
   border: 1px solid #DFE5EC;
   background: #FFFFFF;
-  color: #4A4A4A;
 }
 
+.active-button {
+  border: 1px solid #2196F3;
+  background: #2196F3;
+  color: #FFFFFF;
+}
+
+button:focus {
+  outline:0;
+}
