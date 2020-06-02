@@ -9,7 +9,7 @@ import Ticket from './Ticket'
 function App() {
   const [searchId, setSearchId] = useState('');
   const [tikets, setTikets] = useState([]);
-  const [filter, setFilter] = useState('');
+  const [filter, setFilter] = useState([0,0,0,0,1]);
   const [sort, setSort] = useState('cheap');
 
   useEffect(() => {
@@ -20,7 +20,7 @@ function App() {
           searchId: res.data.searchId,
         }
       }).then((res) => {
-        setTikets( [...tikets, ...res.data.tickets]);
+        setTikets([...tikets, ...res.data.tickets]);
       }).catch(e => console.log(e));
     });
   }, []);
@@ -35,11 +35,33 @@ function App() {
     setSort('fast');
   }
 
-  const sorting = (a,b) => {
-    if(sort === 'cheap') return a.price - b.price;
-    if(sort === 'fast') {
-      return Math.min(...a.segments.map((x)=>x.duration)) - Math.min(...b.segments.map((x)=>x.duration));
+  const handleChangeFilter = (e) => {
+    switch (e.target.name) {
+      case 'all': {
+        if(filter[4]) {
+          setFilter([...filter.slice(0,3), 0]);
+        } else {
+          setFilter([...filter.slice(0,3), 1]);
+        }
+      }
+      default: break;
     }
+  }
+
+  const sorting = (a, b) => {
+    if (sort === 'cheap') return a.price - b.price;
+    if (sort === 'fast') {
+      return Math.min(a.segments[0].duration + a.segments[1].duration) - Math.min(b.segments[0].duration + b.segments[1].duration);
+    }
+  }
+
+  const filtering = (x) => {
+    if (filter[4]) return true;
+    let res = x.segments[0].stops.length + x.segments[1].stops.length;
+    for (let i = 1; i < filter.length; i++) {
+      if (filter[i]) return res === ++i;
+    }
+    return false;
   }
 
   return (
@@ -54,13 +76,21 @@ function App() {
           <div className="filters">
             <p>
               <label className="checkbox-container">Все
-                <input type="checkbox" />
+                <input type="checkbox"
+                  name="all"
+                  checked={filter[4]}
+                  onChange={handleChangeFilter}
+                />
                 <span className="checkmark"></span>
               </label>
             </p>
             <p>
               <label className="checkbox-container">Без пересадок
-                <input type="checkbox" />
+                <input type="checkbox"
+                  name="none"
+                  checked={filter[0]}
+                  onChange={handleChangeFilter}
+                />
                 <span className="checkmark"></span>
               </label>
             </p>
@@ -86,21 +116,21 @@ function App() {
         </div>
         <div className="content">
           <div className='top-buttons'>
-            <button 
-              className={'left-button ' + (sort==='cheap' && 'active-button')} 
+            <button
+              className={'left-button ' + (sort === 'cheap' && 'active-button')}
               onClick={handleClickCheap}>
-                Самый дешевый
+              Самый дешевый
             </button>
-            <button 
-              className={'right-button ' + (sort==='fast' && 'active-button')} 
+            <button
+              className={'right-button ' + (sort === 'fast' && 'active-button')}
               onClick={handleClickFast}>
-                Самый быстрый
+              Самый быстрый
             </button>
           </div>
           <div className="tickets">
             {
-              tikets.length ? tikets.sort(sorting).map((tiket, i) => 
-                <Ticket tiket={tiket} key={i}/>
+              tikets.length ? tikets.sort(sorting).filter(filtering).map((tiket, i) =>
+                <Ticket tiket={tiket} key={i} />
               ) : 'Loading...'
             }
           </div>
