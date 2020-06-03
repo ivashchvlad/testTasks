@@ -9,7 +9,7 @@ import Ticket from './Ticket'
 function App() {
   const [searchId, setSearchId] = useState('');
   const [tikets, setTikets] = useState([]);
-  const [filter, setFilter] = useState([0,0,0,0,1]);
+  const [filter, setFilter] = useState([false,false,false,false,true]);
   const [sort, setSort] = useState('cheap');
 
   useEffect(() => {
@@ -38,11 +38,24 @@ function App() {
   const handleChangeFilter = (e) => {
     switch (e.target.name) {
       case 'all': {
-        if(filter[4]) {
-          setFilter([...filter.slice(0,3), 0]);
-        } else {
-          setFilter([...filter.slice(0,3), 1]);
-        }
+        setFilter([...filter.slice(0,4), !filter[4]])
+        break;
+      }
+      case 'none': {
+        setFilter([!filter[0], ...filter.slice(1,5)]);
+        break;
+      }
+      case 'one': {
+        setFilter([filter[0], !filter[1], ...filter.slice(2,5)]);
+        break;
+      }
+      case 'two': {
+        setFilter([...filter.slice(0,2), !filter[2], ...filter.slice(3,5)]);
+        break;
+      }
+      case 'three': {
+        setFilter([...filter.slice(0,3), !filter[3], filter[4]]);
+        break;
       }
       default: break;
     }
@@ -59,7 +72,7 @@ function App() {
     if (filter[4]) return true;
     let res = x.segments[0].stops.length + x.segments[1].stops.length;
     for (let i = 1; i < filter.length; i++) {
-      if (filter[i]) return res === ++i;
+      if (filter[i]&&res===i) return true;
     }
     return false;
   }
@@ -96,19 +109,31 @@ function App() {
             </p>
             <p>
               <label className="checkbox-container">1 пересадка
-                <input type="checkbox" />
+                <input type="checkbox" 
+                  name="one"
+                  checked={filter[1]}
+                  onChange={handleChangeFilter}
+                />
                 <span className="checkmark"></span>
               </label>
             </p>
             <p>
               <label className="checkbox-container">2 пересадки
-                <input type="checkbox" />
+                <input type="checkbox" 
+                  name="two"
+                  checked={filter[2]}
+                  onChange={handleChangeFilter}
+                />
                 <span className="checkmark"></span>
               </label>
             </p>
             <p>
               <label className="checkbox-container">3 пересадки
-                <input type="checkbox" />
+                <input type="checkbox" 
+                  name="three"
+                  checked={filter[3]}
+                  onChange={handleChangeFilter}
+                />
                 <span className="checkmark"></span>
               </label>
             </p>
