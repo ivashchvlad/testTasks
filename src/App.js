@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import plane from './planeicon.svg'
-import './App.css';
+import './App.css'
 
 import axios from 'axios'
 
@@ -8,22 +8,34 @@ import Ticket from './Ticket'
 
 function App() {
   const [searchId, setSearchId] = useState('');
+  const [stopSearch, setStopSearch] = useState(false);
   const [tikets, setTikets] = useState([]);
-  const [filter, setFilter] = useState([false,false,false,false,true]);
+  const [filter, setFilter] = useState([false, false, false, false, true]);
   const [sort, setSort] = useState('cheap');
 
+  //Get SearchId On Mount
   useEffect(() => {
     axios.get('https://front-test.beta.aviasales.ru/search').then((res) => {
       setSearchId(res.data.searchId);
-      axios.get('https://front-test.beta.aviasales.ru/tickets', {
-        params: {
-          searchId: res.data.searchId,
-        }
-      }).then((res) => {
-        setTikets([...tikets, ...res.data.tickets]);
-      }).catch(e => console.log(e));
     });
   }, []);
+
+  //Get Tikets Until they available
+  useEffect(() => {
+    if (!stopSearch) {
+      axios.get('https://front-test.beta.aviasales.ru/tickets', {
+        params: {
+          searchId: searchId,
+        }
+      }).then((res) => {
+        setTikets(tikets => [...tikets, ...res.data.tickets]);
+        setStopSearch(stopSearch => res.data.stop);
+      }).catch(e => { 
+        console.log(e);
+        setStopSearch(false);
+      });
+    }
+  }, [searchId, stopSearch]);
 
 
 
@@ -36,43 +48,47 @@ function App() {
   }
 
   const handleChangeFilter = (e) => {
+    let newFilter = [...filter];
     switch (e.target.name) {
-      case 'all': {
-        setFilter([...filter.slice(0,4), !filter[4]])
+      case 'all':
+        if (!newFilter[4]) {
+          newFilter.fill(false, 0);
+          newFilter[4] = true;
+        } else newFilter[4] = false;
         break;
-      }
-      case 'none': {
-        setFilter([!filter[0], ...filter.slice(1,5)]);
+      case 'none':
+        if (newFilter[4]) newFilter[4] = false;
+        newFilter[0] = !newFilter[0];
         break;
-      }
-      case 'one': {
-        setFilter([filter[0], !filter[1], ...filter.slice(2,5)]);
+      case 'one':
+        if (newFilter[4]) newFilter[4] = false;
+        newFilter[1] = !newFilter[1];
         break;
-      }
-      case 'two': {
-        setFilter([...filter.slice(0,2), !filter[2], ...filter.slice(3,5)]);
+      case 'two':
+        if (newFilter[4]) newFilter[4] = false;
+        newFilter[2] = !newFilter[2];
         break;
-      }
-      case 'three': {
-        setFilter([...filter.slice(0,3), !filter[3], filter[4]]);
+      case 'three':
+        if (newFilter[4]) newFilter[4] = false;
+        newFilter[3] = !newFilter[3]
         break;
-      }
       default: break;
     }
+    setFilter(newFilter);
   }
 
   const sorting = (a, b) => {
     if (sort === 'cheap') return a.price - b.price;
     if (sort === 'fast') {
-      return Math.min(a.segments[0].duration + a.segments[1].duration) - Math.min(b.segments[0].duration + b.segments[1].duration);
+      return (a.segments[0].duration + a.segments[1].duration) - (b.segments[0].duration + b.segments[1].duration);
     }
   }
 
-  const filtering = (x) => {
+  const filtering = (tiket) => {
     if (filter[4]) return true;
-    let res = x.segments[0].stops.length + x.segments[1].stops.length;
     for (let i = 1; i < filter.length; i++) {
-      if (filter[i]&&res===i) return true;
+      if (filter[i] && (tiket.segments[0].stops.length === i && tiket.segments[1].stops.length === i))
+        return true;
     }
     return false;
   }
@@ -109,7 +125,7 @@ function App() {
             </p>
             <p>
               <label className="checkbox-container">1 пересадка
-                <input type="checkbox" 
+                <input type="checkbox"
                   name="one"
                   checked={filter[1]}
                   onChange={handleChangeFilter}
@@ -119,7 +135,7 @@ function App() {
             </p>
             <p>
               <label className="checkbox-container">2 пересадки
-                <input type="checkbox" 
+                <input type="checkbox"
                   name="two"
                   checked={filter[2]}
                   onChange={handleChangeFilter}
@@ -129,7 +145,7 @@ function App() {
             </p>
             <p>
               <label className="checkbox-container">3 пересадки
-                <input type="checkbox" 
+                <input type="checkbox"
                   name="three"
                   checked={filter[3]}
                   onChange={handleChangeFilter}
